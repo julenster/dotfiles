@@ -1,0 +1,14 @@
+{
+    "editor.fontFamily": "'JetBrainsMono Nerd Font', monospace",
+    "editor.fontSize": 14,
+    "editor.fontLigatures": true,
+    "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font'",
+    "window.titleBarStyle": "custom",
+    "editor.minimap.enabled": false,
+    "editor.smoothScrolling": true,
+    "workbench.list.smoothScrolling": true,
+    "files.autoSave": "afterDelay",
+    "telemetry.telemetryLevel": "off",
+    "claudeCode.preferredLocation": "panel",
+    "security.workspace.trust.untrustedFiles": "open"
+}

@@ -1,0 +1,7 @@
+# Paquetes que bootstrap.sh desinstala si están presentes
+ptyxis                           # terminal de GNOME: se usa kitty
+sddm-astronaut-theme             # rice anterior: ahora la pantalla de inicio es la de Caelestia
+tela-circle-icon-theme-nord      # rice anterior: ahora Papirus
+kwin-scripts-dynamic-workspaces  # escritorios dinámicos: no se usan
+kwin-effects-better-blur-dx      # desenfoque forzado en todas las ventanas: gastaba GPU en juegos
+quickshell                       # el shell de Caelestia (quitado por rendimiento en juegos)

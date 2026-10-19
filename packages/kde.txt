@@ -1,0 +1,19 @@
+# Escritorio principal: KDE Plasma (repos oficiales/CachyOS)
+plasma-meta
+# --- Apps de KDE ---
+dolphin
+dolphin-plugins
+ark
+gwenview
+okular
+kcalc
+konsole
+filelight
+kio-admin
+ffmpegthumbs
+kdegraphics-thumbnailers
+# --- Rice ---
+papirus-icon-theme
+# --- Pantalla de inicio de sesión (el tema lo pone sddm/install-theme.sh) ---
+sddm
+imagemagick                     # sddm/install-theme.sh reduce el fondo

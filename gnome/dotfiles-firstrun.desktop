@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Dotfiles: aplicar rice de GNOME
+Exec=sh -c 'sleep 5; @DOTFILES@/gnome/apply.sh > /tmp/dotfiles-firstrun-gnome.log 2>&1 && rm -f ~/.config/autostart/dotfiles-firstrun-gnome.desktop'
+OnlyShowIn=GNOME;
+X-GNOME-Autostart-enabled=true

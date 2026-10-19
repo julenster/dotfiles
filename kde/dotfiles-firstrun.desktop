@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Dotfiles: aplicar rice de KDE
+Exec=sh -c 'sleep 8; @DOTFILES@/kde/apply.sh > /tmp/dotfiles-firstrun.log 2>&1 && rm -f ~/.config/autostart/dotfiles-firstrun.desktop'
+OnlyShowIn=KDE;
+X-KDE-autostart-phase=2

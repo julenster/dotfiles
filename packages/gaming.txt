@@ -1,0 +1,8 @@
+# Solo en equipos con GPU dedicada (torre)
+cachyos-gaming-meta
+cachyos-gaming-applications
+gamemode
+lib32-gamemode
+goverlay                          # configura MangoHud (gaming/MangoHud.conf)
+scx-scheds                        # planificadores de CPU para juegos (scx_lavd)
+scx-tools                         # scx_loader: arranca el planificador al encender

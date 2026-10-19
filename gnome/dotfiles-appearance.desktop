@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Dotfiles: apariencia de GNOME
+Exec=@DOTFILES@/gnome/appearance.sh
+OnlyShowIn=GNOME;
+X-GNOME-Autostart-enabled=true
+NoDisplay=true

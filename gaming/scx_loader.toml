@@ -1,0 +1,6 @@
+# Planificador de CPU sched_ext para juegos: scx_lavd en modo Gaming (prioriza el hilo que
+# está dibujando el juego: menos tirones y mejores mínimos de FPS). bootstrap.sh lo copia a
+# /etc/scx_loader/config.toml y activa scx_loader.service. Para volver al normal del kernel:
+#   sudo systemctl disable --now scx_loader
+default_sched = "scx_lavd"
+default_mode = "Gaming"

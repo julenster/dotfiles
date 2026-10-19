@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# wallpaper-picker — elige fondo de pantalla con vista previa (kitty + fzf). Atajo: Super+W
+#
+# Busca imágenes en ~/Pictures/wallpapers (pon ahí las tuyas, se admiten subcarpetas) y en
+# los fondos del sistema. Escribe para filtrar, flechas para moverte, Enter para aplicar,
+# Esc para salir. Pone el fondo en KDE (escritorio y pantalla de bloqueo) y en GNOME, y el
+# color de acento cambia solo según el fondo en los dos.
+set -euo pipefail
+
+DIRS=("$HOME/Pictures/wallpapers" /usr/share/backgrounds /usr/share/wallpapers)
+
+case ${1:-} in
+--preview)
+    # Vista previa dentro de fzf con el protocolo de imágenes de kitty
+    dim="${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}"
+    kitten icat --clear --transfer-mode=memory --unicode-placeholder --stdin=no \
+        --place="$dim@0x0" "$2" | sed '$d' | sed $'$s/$/\e[m/'
+    exit
+    ;;
+--inner)
+    ;;
+*)
+    # Se abre en su propia ventana de kitty
+    exec kitty --class wallpaper-picker --title "Fondos de pantalla" \
+        -o initial_window_width=120c -o initial_window_height=34c \
+        -o background_opacity=0.92 "$0" --inner
+    ;;
+esac
+
+mapfile -t files < <(
+    for d in "${DIRS[@]}"; do
+        [[ -d $d ]] && find -L "$d" -type f \
+            \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.jxl' \)
+    done | sort -u
+)
+if ((${#files[@]} == 0)); then
+    echo "No hay imágenes. Guarda tus fondos en ~/Pictures/wallpapers"
+    read -rsn1
+    exit 1
+fi
+
+sel=$(printf '%s\n' "${files[@]}" | fzf \
+    --prompt='  Fondo › ' --layout=reverse --border=rounded --info=inline \
+    --delimiter=/ --with-nth=-1 \
+    --preview "$0 --preview {}" --preview-window=right,65%,border-left) || exit 0
+
+uri="file://$sel"
+if [[ ${XDG_CURRENT_DESKTOP:-} == *KDE* ]]; then
+    plasma-apply-wallpaperimage "$sel" >/dev/null
+    kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image \
+        --group General --key Image "$uri"
+fi
+# GNOME (si está instalado): así tiene el mismo fondo cuando entres en él
+if gsettings writable org.gnome.desktop.background picture-uri &>/dev/null; then
+    gsettings set org.gnome.desktop.background picture-uri "$uri"
+    gsettings set org.gnome.desktop.background picture-uri-dark "$uri"
+    gsettings set org.gnome.desktop.screensaver picture-uri "$uri"
+fi

@@ -1,0 +1,44 @@
+# Paquetes de repos oficiales/CachyOS comunes a todos los equipos (y a los dos escritorios)
+# --- Terminal ---
+kitty
+cava
+fzf
+expac
+# --- Tema / rice (compartido por KDE y GNOME) ---
+adw-gtk-theme
+inter-font
+ttf-jetbrains-mono-nerd
+ttf-meslo-nerd
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+# --- Herramientas ---
+git
+github-cli
+flatpak
+btop
+fastfetch
+ripgrep
+meld
+micro
+vim
+wget
+unzip
+unrar
+openssh
+python-pip
+btrfs-assistant                 # instantáneas de btrfs (snapper)
+shelly                          # gestor de paquetes gráfico
+# --- Apps ---
+steam
+vesktop-bin
+firefox
+blender
+krita
+krita-plugin-gmic
+kdenlive
+obs-studio
+resources                       # monitor del sistema (está en el dock)
+vlc-plugins-all
+docker
+docker-compose

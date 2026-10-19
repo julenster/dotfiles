@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=NVIDIA Digital Vibrance
+Comment=Aplica nvibrant al iniciar sesión
+Exec=@HOME@/.local/bin/nvibrant-apply
+Icon=preferences-desktop-color
+X-KDE-autostart-phase=2

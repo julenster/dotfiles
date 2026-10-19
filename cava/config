@@ -1,0 +1,11 @@
+# cava — visualizador de audio con degradado Miku (ejecuta: cava)
+[general]
+framerate = 60
+bar_width = 2
+bar_spacing = 1
+
+[color]
+gradient = 1
+gradient_count = 2
+gradient_color_1 = '#39c5bb'
+gradient_color_2 = '#e12885'

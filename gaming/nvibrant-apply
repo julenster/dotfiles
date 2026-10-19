@@ -1,0 +1,6 @@
+#!/bin/sh
+# nvibrant-apply [valor] — saturación (digital vibrance) de NVIDIA en Wayland, en todas las salidas.
+# Se ejecuta al iniciar sesión (gaming/nvibrant.desktop). Por defecto 800 (0 = normal)
+VIBRANCE="${1:-800}"
+sleep 3
+exec nvibrant "$VIBRANCE" "$VIBRANCE" "$VIBRANCE" "$VIBRANCE"

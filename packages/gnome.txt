@@ -1,0 +1,11 @@
+# GNOME como escritorio secundario: solo con ./bootstrap.sh --gnome (o si ya estaba instalado)
+gnome-shell
+gnome-session
+gnome-control-center
+gnome-keyring
+nautilus
+xdg-desktop-portal-gnome
+cachyos-gnome-settings
+gnome-tweaks
+extension-manager
+gnome-shell-extension-appindicator

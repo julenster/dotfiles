@@ -1,0 +1,12 @@
+# Al actualizar los planificadores, reinicia scx_loader para usar ya la versión nueva.
+# bootstrap.sh lo copia a /etc/pacman.d/hooks/.
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = scx-scheds
+Target = scx-scheds-git
+
+[Action]
+Description = Reiniciando scx_loader con la nueva versión de los planificadores...
+When = PostTransaction
+Exec = /usr/bin/systemctl try-restart scx_loader.service

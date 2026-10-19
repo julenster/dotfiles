@@ -1,0 +1,5 @@
+# Paquetes de AUR solo para GNOME (con ./bootstrap.sh --gnome)
+gnome-shell-extension-blur-my-shell
+gnome-shell-extension-just-perfection-desktop
+gnome-shell-extension-rounded-window-corners-reborn
+morewaita-icon-theme

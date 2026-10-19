@@ -1,0 +1,13 @@
+# Paquetes de AUR (se instalan con yay) comunes a todos los equipos
+# --- Rice de KDE ---
+darkly-bin                        # estilo de apps y de ventanas
+# --- Rice compartido ---
+bibata-cursor-theme-bin
+# --- Apps ---
+visual-studio-code-bin
+rider
+tidal-hifi-bin
+github-desktop-bin
+stremio
+unityhub
+snake                             # el juego de la serpiente en la terminal
