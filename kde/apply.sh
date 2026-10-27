@@ -12,7 +12,7 @@ set -uo pipefail
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Súbelo cuando cambies kde/layout.js para que se vuelva a aplicar en todos los equipos
-LAYOUT_VERSION=3
+LAYOUT_VERSION=4
 LAYOUT_STAMP=~/.config/dotfiles-kde-layout
 # Apps del dock en un equipo nuevo (las que no estén instaladas se saltan). Si ya hay un dock,
 # layout.js conserva sus apps

@@ -10,4 +10,6 @@ tidal-hifi-bin
 github-desktop-bin
 stremio
 unityhub
+fmodstudio                        # audio para juegos (FMOD, con Unity)
+google-chrome
 snake                             # el juego de la serpiente en la terminal

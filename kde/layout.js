@@ -40,6 +40,7 @@ clock.writeConfig("dateDisplayFormat", "BesideTime");
 
 top.addWidget("org.kde.plasma.panelspacer");
 top.addWidget("org.kde.plasma.systemtray");
+top.addWidget("org.kde.plasma.minimizeall");
 
 // --- Dock ---
 var dock = new Panel();
