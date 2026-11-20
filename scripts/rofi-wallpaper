@@ -26,8 +26,8 @@ notify() { notify-send -a "Fondos de pantalla" -i preferences-desktop-wallpaper 
 # Casilla 16:9 con un texto (las casillas de la rejilla son solo imagen)
 tile() {
     local out="$CACHE/tile-$1.png"
-    [[ -s $out ]] || magick -size 480x270 xc:'#141414' -fill '#a8964f' -font Maple-Mono-NF-Regular \
-        -pointsize 34 -gravity center -annotate +0+0 "$2" "$out"
+    [[ -s $out ]] || magick -size 640x360 xc:'#141414' -fill '#a8964f' -font Maple-Mono-NF-Regular \
+        -pointsize 45 -gravity center -annotate +0+0 "$2" "$out"
     echo "$out"
 }
 menu() { rofi -dmenu -i -show-icons -config "$DOTFILES/rofi/wallpaper.rasi" "$@"; }
@@ -137,7 +137,7 @@ for f in "${files[@]}"; do
 done
 if ((${#todo[@]})); then
     printf '%s\0' "${todo[@]}" | xargs -0 -n2 -P"$(nproc)" sh -c \
-        'magick "$1[0]" -thumbnail 480x270^ -gravity center -extent 480x270 -quality 85 "$2" 2>/dev/null' _ || true
+        'magick "$1[0]" -thumbnail 640x360^ -gravity center -extent 640x360 -quality 85 "$2" 2>/dev/null' _ || true
 fi
 
 # Fondo actual, para que salga ya seleccionado (la casilla 0 es la de Wallhaven)

@@ -3,7 +3,7 @@
    dorado #a8964f en lo seleccionado. La rejilla copia la de Artur (3x3, solo miniaturas, sin
    paginar: baja fila a fila) pero con casillas 16:9 en vez de cuadradas. */
 * {
-    font: "Maple Mono NF 10";
+    font: "Maple Mono NF 13";
     background-color: transparent;
     text-color: #606060;
     accent: #a8964f;
@@ -18,7 +18,7 @@ configuration {
 window {
     location: center;
     anchor: center;
-    width: 1040px;
+    width: 1560px;
     border: 2px;
     border-color: #000000;
     border-radius: 20px;
@@ -59,12 +59,12 @@ listview {
 
 /* Casilla 16:9. rofi reserva siempre una caja de size x size para el icono (y carga la imagen a
    ese tamaño, por eso no se puede bajar size sin que se vea borrosa). Así que size es el ANCHO
-   (1000px útiles / 3 columnas - huecos - 8px de marco ≈ 318px) y el padding negativo del element
-   le quita el alto sobrante: 318x179 de imagen + 4px de marco. Las miniaturas que genera el
+   (1516px útiles / 3 columnas - huecos - 8px de marco ≈ 490px) y el padding negativo del element
+   le quita el alto sobrante: 490x276 de imagen + 4px de marco. Las miniaturas que genera el
    script ya son 16:9 (también la de buscar en Wallhaven y la de más resultados). */
 element {
     children: [element-icon];
-    padding: -66px 4px -65px 4px;
+    padding: -103px 4px -103px 4px;
     border-radius: 10px;
 }
 
@@ -79,6 +79,6 @@ element selected.normal, element selected.active, element selected.urgent {
 }
 
 element-icon {
-    size: 318px;
+    size: 490px;
     cursor: inherit;
 }
