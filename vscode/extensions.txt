@@ -1,1 +1,6 @@
 anthropic.claude-code
+vscjava.vscode-java-pack
+vscjava.vscode-gradle
+catppuccin.catppuccin-vsc-icons
+usernamehw.errorlens
+heavenaldrico.aldrico-s-gruvbox

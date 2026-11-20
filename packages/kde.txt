@@ -14,6 +14,9 @@ ffmpegthumbs
 kdegraphics-thumbnailers
 # --- Rice ---
 papirus-icon-theme
+rofi                            # lanzador (Super+Espacio) y selector de fondos (Super+Shift+W)
+jq                              # scripts/rofi-wallpaper: búsqueda en Wallhaven
+libnotify                       # avisos de scripts/rofi-wallpaper (notify-send)
 # --- Pantalla de inicio de sesión (el tema lo pone sddm/install-theme.sh) ---
 sddm
 imagemagick                     # sddm/install-theme.sh reduce el fondo

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # apply.sh — rice de KDE con lo que trae Plasma, sin shells aparte (Caelestia se quitó porque
-# bajaba el rendimiento en juegos): barra superior + dock con paneles de Plasma, Darkly, Papirus,
-# Inter, Super = vista general como en GNOME, Super+A rejilla de apps, kitty con Miku, atajos
+# bajaba el rendimiento en juegos): barra superior + dock translúcidos con paneles de Plasma,
+# Klassy, Papirus, Inter, rofi (Super+Espacio) con selector de fondos, Super = vista general como en GNOME, Super+A rejilla de apps, kitty con Miku, atajos
 # libres para jugar y el touchpad.
 # Debe ejecutarse dentro de una sesión de Plasma. Idempotente: puedes ejecutarlo cuando quieras.
 #
@@ -12,7 +12,7 @@ set -uo pipefail
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Súbelo cuando cambies kde/layout.js para que se vuelva a aplicar en todos los equipos
-LAYOUT_VERSION=4
+LAYOUT_VERSION=8
 LAYOUT_STAMP=~/.config/dotfiles-kde-layout
 # Apps del dock en un equipo nuevo (las que no estén instaladas se saltan). Si ya hay un dock,
 # layout.js conserva sus apps
@@ -99,9 +99,43 @@ fi
 
 # --- Apariencia ---
 echo "Apariencia"
-kw kdeglobals --group KDE --key widgetStyle Darkly
-kw kwinrc --group org.kde.kdecoration2 --key library org.kde.darkly
-kw kwinrc --group org.kde.kdecoration2 --key theme Darkly
+# Klassy (estilo de apps, decoración de ventanas y tema de Plasma)
+kw kdeglobals --group KDE --key widgetStyle Klassy
+kw kwinrc --group org.kde.kdecoration2 --key library org.kde.klassy
+kw kwinrc --group org.kde.kdecoration2 --key theme Klassy
+# Tema de Plasma "klassy-glass": klassy-dark con el fondo de los paneles en negro translúcido
+# (PANEL_OPACITY; Klassy trae su gris al 0.85), como cristal ahumado: se ve el fondo detrás y
+# el texto blanco se lee también con fondos claros. Sin el efecto de contraste de Klassy. Se
+# genera aquí a partir del instalado para seguir sus actualizaciones
+PANEL_OPACITY=0.4
+glass_src=/usr/share/plasma/desktoptheme/klassy-dark
+glass=~/.local/share/plasma/desktoptheme/klassy-glass
+if [[ -d $glass_src ]]; then
+    rm -rf "$glass"
+    mkdir -p "${glass%/*}"
+    cp -r "$glass_src" "$glass"
+    for svg in "$glass"/translucent/widgets/panel-background.svgz "$glass"/widgets/panel-background.svgz; do
+        [[ -f $svg ]] || continue
+        zcat "$svg" | sed -e "s/opacity:0\.85;fill:currentColor/opacity:$PANEL_OPACITY;fill:#000000/g" \
+            -e 's/style="opacity:0\.5"/style="opacity:0.2"/g' | gzip -9 >"$svg.new"
+        mv "$svg.new" "$svg"
+    done
+    sed -i 's/"Id": *"klassy-dark"/"Id": "klassy-glass"/; s/"Name": *"[^"]*"/"Name": "Klassy Glass"/' "$glass/metadata.json"
+    cat >"$glass/plasmarc" <<'RC'
+[Settings]
+FallbackTheme=breeze-dark
+
+[ContrastEffect]
+enabled=false
+
+[AdaptiveTransparency]
+enabled=false
+RC
+    rm -rf ~/.cache/plasma_theme_klassy-glass* ~/.cache/ksvg-elements-klassy-glass* 2>/dev/null
+    plasma-apply-desktoptheme klassy-glass >/dev/null 2>&1 || true
+else
+    echo "  (falta klassy-bin)"
+fi
 kw kwinrc --group org.kde.kdecoration2 --key BorderSize None
 kw kwinrc --group org.kde.kdecoration2 --key BorderSizeAuto false
 # Botones de las ventanas: menú, fijar, sombrear y "en todos los escritorios" a la izquierda;
@@ -159,6 +193,43 @@ shortcut kitty.desktop kitty _launch kitty "Ctrl+Alt+T"
 kw kdeglobals --group General --key TerminalApplication kitty
 kw kdeglobals --group General --key TerminalService kitty.desktop
 
+# --- rofi: lanzador en Super+Espacio y selector de fondos en Super+Shift+W ---
+# El cambio de distribución de teclado (si hay varias) pasa de Super+Espacio a
+# Super+Shift+Espacio. Super sola sigue siendo la vista general
+echo "rofi"
+mkdir -p ~/.config/rofi ~/.local/share/applications
+ln -sfn "$DOTFILES/rofi/config.rasi" ~/.config/rofi/config.rasi
+cat >~/.local/share/applications/net.local.rofi-launcher.desktop <<'DESK'
+[Desktop Entry]
+Type=Application
+Name=Lanzador (rofi)
+Exec=rofi -show drun
+Icon=rofi
+NoDisplay=true
+StartupNotify=false
+X-KDE-GlobalAccel-CommandShortcut=true
+DESK
+# Visible en rofi y en el menú: escribe "fondo" para abrirlo
+cat >~/.local/share/applications/net.local.rofi-wallpaper.desktop <<DESK
+[Desktop Entry]
+Type=Application
+Name=Fondos de pantalla
+GenericName=Cambiar el fondo de escritorio
+Keywords=wallpaper;fondo;
+Exec=$DOTFILES/scripts/rofi-wallpaper
+Icon=preferences-desktop-wallpaper
+StartupNotify=false
+X-KDE-GlobalAccel-CommandShortcut=true
+DESK
+kbuildsycoca6 >/dev/null 2>&1 || true
+opts=$(kreadconfig6 --file kxkbrc --group Layout --key Options)
+new_opts=$(tr ',' '\n' <<<"$opts" | grep -vx 'grp:win_space_toggle' | paste -sd,)
+[[ $new_opts != "$opts" ]] && kw kxkbrc --group Layout --key Options "$new_opts"
+shortcut "KDE Keyboard Layout Switcher" "Keyboard Layout Switcher" \
+    "Switch to Next Keyboard Layout" "Switch to Next Keyboard Layout" "Meta+Shift+Space" "Meta+Alt+K"
+shortcut net.local.rofi-launcher.desktop "Lanzador (rofi)" _launch "Lanzador (rofi)" "Meta+Space"
+shortcut net.local.rofi-wallpaper.desktop "Fondos de pantalla" _launch "Fondos de pantalla" "Meta+Shift+W"
+
 # --- Vista general (Super) y su buscador ---
 # Sin las ventanas minimizadas: menos miniaturas que dibujar al abrirla
 kw kwinrc --group Effect-overview --key IgnoreMinimized true
@@ -169,7 +240,8 @@ kw krunnerrc --group Plugins --group Favorites --key plugins "krunner_services,k
 # la memoria al escribir en la vista general y tumba kwin_wayland (2026-10-17 y 2026-10-18)
 for p in krunner_webshortcuts krunner_bookmarksrunner krunner_recentdocuments krunner_spellcheck \
     krunner_dictionary krunner_charrunner krunner_katesessions krunner_konsoleprofiles \
-    krunner_appstream; do
+    krunner_appstream browserhistory browsertabs baloosearch locations krunner_placesrunner \
+    org.kde.activities2 helprunner; do
     kw krunnerrc --group Plugins --key "${p}Enabled" false
 done
 
@@ -218,10 +290,12 @@ if [[ " $* " == *" --panels "* || $(cat "$LAYOUT_STAMP" 2>/dev/null) != "$LAYOUT
 fi
 
 # --- Fondo ---
+# Los fondos del repo van a ~/Pictures/Wallpapers (los que elige el selector de rofi)
+mkdir -p ~/Pictures/Wallpapers
+cp -n "$DOTFILES"/wallpapers/* ~/Pictures/Wallpapers/ 2>/dev/null || true
 if [[ " $* " == *" --wallpaper "* || ! -f $WALLPAPER_STAMP ]]; then
     echo "Fondo de escritorio"
     mkdir -p ~/Pictures/Wallpapers
-    cp -n "$WALLPAPER" ~/Pictures/Wallpapers/
     wall=~/Pictures/Wallpapers/$(basename "$WALLPAPER")
     if plasma-apply-wallpaperimage "$wall" >/dev/null 2>&1; then
         kw kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image --group General \

@@ -19,10 +19,13 @@ con sesiones de OBS/Steam/Discord…) y el rendimiento se decide según el hardw
 - **KDE Plasma es el escritorio principal**. **GNOME es secundario**: se instala con `--gnome`
   o si ya estaba, y se elige en SDDM.
 - Aspecto de KDE: **paneles nativos de Plasma, sin shells aparte** (shells como Caelestia
-  bajaban el rendimiento en juegos). `kde/apply.sh` + `kde/layout.js`: barra superior flotante
-  de 34 px (kickoff, pager, reloj centrado, bandeja) y dock flotante que esquiva ventanas
-  (icontasks con todas las apps abiertas + botón de rejilla de apps `kickerdash`), Darkly
-  (estilo y decoración), Breeze Dark, Papirus-Dark, Inter, Bibata. `layout.js` conserva las
+  bajaban el rendimiento en juegos). `kde/apply.sh` + `kde/layout.js`: arriba tres "píldoras"
+  flotantes de 32 px estilo Hyprland/waybar (kickoff + pager con números | reloj |
+  bandeja) y dock flotante que esquiva ventanas
+  (icontasks con todas las apps abiertas + botón de rejilla de apps `kickerdash`), todos
+  **casi transparentes** (`opacity = "translucent"` + tema de Plasma `klassy-glass` en negro translúcido, que
+  `kde/apply.sh` genera desde `klassy-dark` con `PANEL_OPACITY` y sin efecto de contraste).
+  Reloj en JetBrainsMono Nerd Font (la de kitty), 24 h y fecha dd/MM para que quede centrado. **Klassy** (estilo, decoración y tema de Plasma), Breeze Dark, Papirus-Dark, Inter, Bibata. `layout.js` conserva las
   apps ancladas del dock al rehacer los paneles; subir `LAYOUT_VERSION` al cambiarlo.
 - **Flujo de GNOME**: Super = vista general de KWin, Super+A = rejilla de apps a pantalla
   completa (KWin no permite el doble toque de Super). KRunner con apps y ajustes como
@@ -30,6 +33,12 @@ con sesiones de OBS/Steam/Discord…) y el rendimiento se decide según el hardw
   `krunner_appstream` desactivado (con KWin 6.8 tumbaba kwin_wayland al buscar).
 - **Sin desenfoque forzado** ni reglas de opacidad en todas las ventanas: solo el blur de KWin
   donde la app lo pide (forzarlo gasta GPU jugando).
+- **rofi** (aspecto de ranger097, `rofi/config.rasi`) en **Super+Espacio**; el cambio de
+  distribución de teclado pasa a Super+Shift+Espacio. Selector de fondos con miniaturas
+  `scripts/rofi-wallpaper` (`rofi/wallpaper.rasi`) en **Super+Shift+W** y en rofi como
+  "Fondos de pantalla"; usa `~/Pictures/Wallpapers` (ahí se copian los de `wallpapers/`). Su
+  primera casilla busca en **Wallhaven** (API sin cuenta, solo SFW, ≥1920x1080) y descarga a
+  `~/Pictures/Wallpapers/wallhaven` (`rofi-wallpaper --wallhaven` va directo).
 - **Nada de atajos Alt+tecla en KDE**: chocan con los juegos (agacharse con Alt).
 - Pantalla de inicio de sesión: **Breeze de KDE con el fondo del escritorio**; bloqueo,
   apagado y splash, los de serie de KDE. Nada de temas QML a medida para SDDM/bloqueo (dieron
@@ -51,6 +60,8 @@ con sesiones de OBS/Steam/Discord…) y el rendimiento se decide según el hardw
 - **Siempre la última versión de GNOME** (rolling). **No forzar extensiones incompatibles**:
   las pendientes (Forge, Open Bar, Quick Settings Tweaks, Media Controls, Clipboard Indicator)
   están en `scripts/check-extensions.sh`.
+- VS Code con el aspecto de ranger097/ranger097_nixos_dotfiles: tema Aldrico's Gruvbox
+  ("Gruvbox in Black"), Maple Mono NF, sin pestañas ni barra de estado, barra lateral a la derecha.
 - Terminal **kitty** con el GIF de Miku de kovasko/hyprland-dotfiles (`kitten icat … |
   fastfetch --raw -`). Ptyxis se desinstala.
 - GNOME: acento según el fondo (Auto Accent Colour) + Accent Icons sobre **MoreWaita**.
@@ -82,10 +93,11 @@ con sesiones de OBS/Steam/Discord…) y el rendimiento se decide según el hardw
   Volver a ejecutarlo para cambiar el fondo. `bootstrap.sh` lo ejecuta solo si falta
   `theme.conf.user`.
 - `gaming/` — archivos del perfil gaming (cachés de shaders, scx_loader, MangoHud, nvibrant).
-- `wallpapers/` — el fondo.
+- `wallpapers/` — fondos (el fijo + los que se copian a `~/Pictures/Wallpapers`).
+- `rofi/` — lanzador y selector de fondos (enlazado por `kde/apply.sh`).
 - `kitty/`, `fastfetch/`, `fish/`, `cava/`, `vscode/` — configs enlazadas con symlinks
   (`scripts/link-terminal.sh`, compartido por los dos escritorios).
-- `scripts/` — `wallpaper-picker` (GNOME Super+W), `steam-proton-default.sh`,
+- `scripts/` — `rofi-wallpaper` (KDE Super+Shift+W), `wallpaper-picker` (GNOME Super+W), `steam-proton-default.sh`,
   `check-packages.sh`, `check-extensions.sh`, `sync-packages.sh`, `remove-gnome.sh`.
 
 ## Convenciones

@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# rofi-wallpaper — selector de fondos de pantalla con miniaturas en rofi. Atajo: Super+Shift+W
+# (también sale en rofi escribiendo "fondo").
+#
+#   rofi-wallpaper              # tus fondos (la primera casilla busca en Wallhaven)
+#   rofi-wallpaper --wallhaven  # directamente al buscador de Wallhaven
+#
+# Tus fondos: imágenes de ~/Pictures/Wallpapers y ~/Pictures/wallpapers (con subcarpetas).
+# Wallhaven (wallhaven.cc, sin cuenta): escribe qué buscas (vacío = lo más popular del mes),
+# elige una miniatura y se descarga a ~/Pictures/Wallpapers/wallhaven y se pone de fondo. Solo
+# imágenes aptas para todos (SFW) y de al menos 1920x1080.
+# Flechas o ratón para elegir, escribe para filtrar, Enter para aplicar, Esc para salir. Pone el
+# fondo en el escritorio y en la pantalla de bloqueo de KDE (y en GNOME si está); el color de
+# acento cambia solo según el fondo.
+set -euo pipefail
+
+DOTFILES="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+DIRS=("$HOME/Pictures/Wallpapers" "$HOME/Pictures/wallpapers")
+DOWNLOADS="$HOME/Pictures/Wallpapers/wallhaven"
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/rofi-wallpaper"
+API="https://wallhaven.cc/api/v1/search"
+UA="rofi-wallpaper"
+mkdir -p "$CACHE/wallhaven"
+
+notify() { notify-send -a "Fondos de pantalla" -i preferences-desktop-wallpaper "$@" 2>/dev/null || true; }
+menu() { rofi -dmenu -i -show-icons -config "$DOTFILES/rofi/wallpaper.rasi" "$@"; }
+
+apply_wallpaper() {
+    local uri="file://$1"
+    if [[ ${XDG_CURRENT_DESKTOP:-} == *KDE* ]]; then
+        plasma-apply-wallpaperimage "$1" >/dev/null
+        kwriteconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image \
+            --group General --key Image "$uri"
+    fi
+    # GNOME (si está instalado): así tiene el mismo fondo cuando entres en él
+    if gsettings writable org.gnome.desktop.background picture-uri &>/dev/null; then
+        gsettings set org.gnome.desktop.background picture-uri "$uri"
+        gsettings set org.gnome.desktop.background picture-uri-dark "$uri"
+        gsettings set org.gnome.desktop.screensaver picture-uri "$uri"
+    fi
+}
+
+# --- Wallhaven ---
+wallhaven() {
+    local query page=1 json last n idx i id url ext dest tmp
+    local -a ids urls thumbs res todo
+    query=$(menu -p " Wallhaven" -theme-str 'listview { lines: 0; } window { width: 640px; }' \
+        -theme-str 'entry { placeholder: "¿Qué fondo buscas? (vacío = lo más popular)"; }' \
+        </dev/null) || exit 0
+    local q params
+    q=$(jq -rn --arg q "$query" '$q | @uri')
+    params="categories=111&purity=100&atleast=1920x1080&ratios=landscape"
+    if [[ -n $query ]]; then params+="&q=$q&sorting=relevance"
+    else params+="&sorting=toplist&topRange=1M"; fi
+
+    while :; do
+        if ! json=$(curl -fsS --max-time 20 -A "$UA" "$API?$params&page=$page"); then
+            notify "No se pudo conectar con Wallhaven" "Comprueba la conexión a internet."
+            exit 1
+        fi
+        ids=() urls=() thumbs=() res=()
+        while IFS=$'\t' read -r id url thumb r; do
+            ids+=("$id") urls+=("$url") thumbs+=("$thumb") res+=("$r")
+        done < <(jq -r '.data[] | [.id, .path, .thumbs.small, .resolution] | @tsv' <<<"$json")
+        last=$(jq -r '.meta.last_page' <<<"$json")
+        n=${#ids[@]}
+        if ((n == 0)); then
+            notify "Wallhaven" "No hay resultados para «$query»."
+            exit 0
+        fi
+        # Miniaturas en paralelo (se guardan en caché)
+        todo=()
+        for i in "${!ids[@]}"; do
+            [[ -s $CACHE/wallhaven/${ids[$i]}.jpg ]] || todo+=("${thumbs[$i]}" "$CACHE/wallhaven/${ids[$i]}.jpg")
+        done
+        if ((${#todo[@]})); then
+            printf '%s\0' "${todo[@]}" | xargs -0 -n2 -P8 sh -c \
+                'curl -fsS --max-time 20 -A rofi-wallpaper -o "$2" "$1" || rm -f "$2"' _ || true
+        fi
+
+        idx=$({
+            for i in "${!ids[@]}"; do
+                printf '%s\0icon\x1f%s\n' "${res[$i]}" "$CACHE/wallhaven/${ids[$i]}.jpg"
+            done
+            if ((page < last)); then printf 'Más resultados\0icon\x1fgo-next\n'; fi
+        } | menu -format i -p " ${query:-Populares} · $page/$last") || exit 0
+        [[ -n $idx ]] || exit 0
+        if ((idx == n)); then
+            ((page++))
+            continue
+        fi
+
+        id=${ids[$idx]} url=${urls[$idx]}
+        ext=${url##*.}
+        mkdir -p "$DOWNLOADS"
+        dest="$DOWNLOADS/wallhaven-$id.$ext"
+        if [[ ! -s $dest ]]; then
+            notify "Descargando fondo…" "wallhaven-$id (${res[$idx]})"
+            tmp="$dest.part"
+            if ! curl -fsS --max-time 300 -A "$UA" -o "$tmp" "$url"; then
+                rm -f "$tmp"
+                notify "No se pudo descargar el fondo" "$url"
+                exit 1
+            fi
+            mv "$tmp" "$dest"
+        fi
+        apply_wallpaper "$dest"
+        notify "Fondo cambiado" "Guardado en ~/Pictures/Wallpapers/wallhaven"
+        exit 0
+    done
+}
+
+[[ ${1:-} == --wallhaven ]] && wallhaven
+
+# --- Tus fondos ---
+mapfile -t files < <(
+    for d in "${DIRS[@]}"; do
+        [[ -d $d ]] && find -L "$d" -type f \
+            \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \)
+    done | sort -u
+)
+
+# Miniaturas (solo la primera vez o si la imagen cambia), en paralelo: rofi abre al momento
+thumb() { echo "$CACHE/$(printf '%s' "$1" | md5sum | cut -d' ' -f1).jpg"; }
+todo=()
+for f in "${files[@]}"; do
+    t=$(thumb "$f")
+    [[ -f $t && $t -nt $f ]] || todo+=("$f" "$t")
+done
+if ((${#todo[@]})); then
+    printf '%s\0' "${todo[@]}" | xargs -0 -n2 -P"$(nproc)" sh -c \
+        'magick "$1[0]" -thumbnail 480x270^ -gravity center -extent 480x270 -quality 85 "$2" 2>/dev/null' _ || true
+fi
+
+# Fondo actual, para que salga ya seleccionado (la casilla 0 es la de Wallhaven)
+current=$(kreadconfig6 --file kscreenlockerrc --group Greeter --group Wallpaper --group org.kde.image \
+    --group General --key Image 2>/dev/null || true)
+current=${current#file://}
+row=0
+for i in "${!files[@]}"; do [[ ${files[$i]} == "$current" ]] && row=$((i + 1)); done
+
+idx=$({
+    printf 'Buscar en Wallhaven\0icon\x1fsystem-search\n'
+    for f in "${files[@]}"; do
+        name=${f##*/}
+        printf '%s\0icon\x1f%s\n' "${name%.*}" "$(thumb "$f")"
+    done
+} | menu -format i -selected-row "$row" -p "Fondo") || exit 0
+[[ -n $idx ]] || exit 0
+((idx == 0)) && wallhaven
+apply_wallpaper "${files[$((idx - 1))]}"

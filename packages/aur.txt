@@ -1,8 +1,9 @@
 # Paquetes de AUR (se instalan con yay) comunes a todos los equipos
 # --- Rice de KDE ---
-darkly-bin                        # estilo de apps y de ventanas
+klassy-bin                        # estilo de apps, ventanas y tema de Plasma (paneles translúcidos)
 # --- Rice compartido ---
 bibata-cursor-theme-bin
+maplemono-nf-unhinted             # fuente de VS Code (Maple Mono NF)
 # --- Apps ---
 visual-studio-code-bin
 rider
