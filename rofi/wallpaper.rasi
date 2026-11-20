@@ -1,6 +1,7 @@
 /* Selector de fondos (scripts/rofi-wallpaper): rejilla de miniaturas con el mismo aspecto que
    el lanzador (rofi/config.rasi): negro translúcido, bordes redondeados, Maple Mono y el
-   dorado #a8964f en lo seleccionado. */
+   dorado #a8964f en lo seleccionado. La rejilla copia la de Artur (3x3, solo miniaturas, sin
+   paginar: baja fila a fila) pero con casillas 16:9 en vez de cuadradas. */
 * {
     font: "Maple Mono NF 10";
     background-color: transparent;
@@ -10,13 +11,14 @@
 
 configuration {
     show-icons: true;
+    scroll-method: 1;
     icon-theme: "Papirus-Dark";
 }
 
 window {
     location: center;
     anchor: center;
-    width: 1160px;
+    width: 1040px;
     border: 2px;
     border-color: #000000;
     border-radius: 20px;
@@ -46,38 +48,37 @@ entry {
 }
 
 listview {
-    columns: 4;
+    columns: 3;
     lines: 3;
-    spacing: 12px;
+    spacing: 10px;
     dynamic: false;
     scrollbar: false;
     fixed-height: true;
     flow: horizontal;
 }
 
+/* Casilla 16:9. rofi reserva siempre una caja de size x size para el icono (y carga la imagen a
+   ese tamaño, por eso no se puede bajar size sin que se vea borrosa). Así que size es el ANCHO
+   (1000px útiles / 3 columnas - huecos - 8px de marco ≈ 318px) y el padding negativo del element
+   le quita el alto sobrante: 318x179 de imagen + 4px de marco. Las miniaturas que genera el
+   script ya son 16:9 (también la de buscar en Wallhaven y la de más resultados). */
 element {
-    orientation: vertical;
-    padding: 8px;
-    spacing: 6px;
-    border: 2px;
-    border-radius: 12px;
-    border-color: transparent;
+    children: [element-icon];
+    padding: -66px 4px -65px 4px;
+    border-radius: 10px;
 }
 
-element selected.normal {
-    border-color: @accent;
-    background-color: rgba(168,150,79,0.12);
-    text-color: @accent;
+element normal.normal, element alternate.normal,
+element normal.active, element alternate.active,
+element normal.urgent, element alternate.urgent {
+    background-color: transparent;
+}
+
+element selected.normal, element selected.active, element selected.urgent {
+    background-color: @accent;
 }
 
 element-icon {
-    size: 240px;
-    horizontal-align: 0.5;
-    cursor: inherit;
-}
-
-element-text {
-    horizontal-align: 0.5;
-    text-color: inherit;
+    size: 318px;
     cursor: inherit;
 }

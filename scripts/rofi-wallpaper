@@ -23,6 +23,13 @@ UA="rofi-wallpaper"
 mkdir -p "$CACHE/wallhaven"
 
 notify() { notify-send -a "Fondos de pantalla" -i preferences-desktop-wallpaper "$@" 2>/dev/null || true; }
+# Casilla 16:9 con un texto (las casillas de la rejilla son solo imagen)
+tile() {
+    local out="$CACHE/tile-$1.png"
+    [[ -s $out ]] || magick -size 480x270 xc:'#141414' -fill '#a8964f' -font Maple-Mono-NF-Regular \
+        -pointsize 34 -gravity center -annotate +0+0 "$2" "$out"
+    echo "$out"
+}
 menu() { rofi -dmenu -i -show-icons -config "$DOTFILES/rofi/wallpaper.rasi" "$@"; }
 
 apply_wallpaper() {
@@ -75,14 +82,15 @@ wallhaven() {
         done
         if ((${#todo[@]})); then
             printf '%s\0' "${todo[@]}" | xargs -0 -n2 -P8 sh -c \
-                'curl -fsS --max-time 20 -A rofi-wallpaper -o "$2" "$1" || rm -f "$2"' _ || true
+                'curl -fsS --max-time 20 -A rofi-wallpaper -o "$2" "$1" &&
+                 magick "$2" -thumbnail 480x270^ -gravity center -extent 480x270 "$2" || rm -f "$2"' _ || true
         fi
 
         idx=$({
             for i in "${!ids[@]}"; do
                 printf '%s\0icon\x1f%s\n' "${res[$i]}" "$CACHE/wallhaven/${ids[$i]}.jpg"
             done
-            if ((page < last)); then printf 'Más resultados\0icon\x1fgo-next\n'; fi
+            if ((page < last)); then printf 'Más resultados\0icon\x1f%s\n' "$(tile more '  Más resultados')"; fi
         } | menu -format i -p " ${query:-Populares} · $page/$last") || exit 0
         [[ -n $idx ]] || exit 0
         if ((idx == n)); then
@@ -140,7 +148,7 @@ row=0
 for i in "${!files[@]}"; do [[ ${files[$i]} == "$current" ]] && row=$((i + 1)); done
 
 idx=$({
-    printf 'Buscar en Wallhaven\0icon\x1fsystem-search\n'
+    printf 'Buscar en Wallhaven\0icon\x1f%s\n' "$(tile wallhaven '  Buscar en Wallhaven')"
     for f in "${files[@]}"; do
         name=${f##*/}
         printf '%s\0icon\x1f%s\n' "${name%.*}" "$(thumb "$f")"
